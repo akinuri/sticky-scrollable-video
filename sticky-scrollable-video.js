@@ -11,8 +11,7 @@ function StickyScrollableVideo(vidEl, pixelsPerSec) {
         element : vidEl.parentElement,
     };
     
-    // padding-bottom will be added to this element
-    // when younger siblings are set to "fixed"
+    // padding-bottom will be added to this element when younger siblings are set to "fixed"
     // so that scroll height of the page doesn't change
     this.contentElement = this.parent.element.parentElement;
     
@@ -42,8 +41,7 @@ function StickyScrollableVideo(vidEl, pixelsPerSec) {
         self.video.height = self.video.element.offsetHeight;
         
         self.parent.height      = self.parent.element.offsetHeight;
-        self.parent.boundingBox = self.parent.element.getBoundingClientRect();
-        self.parent.top         = self.parent.boundingBox.top + scrollY;
+        self.parent.top         = self.parent.element.getBoundingClientRect().top + scrollY;
         self.parent.bottom      = self.parent.top + self.parent.height;
         
         self.scroll.area   = [self.parent.top, self.parent.top + self.parent.height - self.video.height];
@@ -70,15 +68,6 @@ function StickyScrollableVideo(vidEl, pixelsPerSec) {
             
             if (self.scroll.area[0] <= scrollY && scrollY <= self.scroll.area[1]) {
                 scrollPercent  = parseFloat(((scrollY - self.scroll.area[0]) / self.scroll.height).toFixed(6));
-                if (self.scroll._prevPercent == null) {
-                    self.scroll._prevPercent = scrollPercent;
-                } else {
-                    if (self.scroll._prevPct < scrollPercent) {
-                        self.scroll.dir = 1;
-                    } else {
-                        self.scroll.dir = -1;
-                    }
-                }
                 nextFrameTime = parseFloat((scrollPercent * self.video.element.duration).toFixed(6));
                 if (!self.video.playing) {
                     self.video.playing = true;
