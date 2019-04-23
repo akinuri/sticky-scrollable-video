@@ -24,7 +24,7 @@ function StickyScrollableVideo(vidEl, pixelsPerSec) {
     };
     
     this.scroll = {
-        pixelsPerSec : pixelsPerSec || 500,
+        pixelsPerSec : pixelsPerSec || 250,
         area         : [],
         height       : 0,
         dir          : 0,
