@@ -34,11 +34,6 @@
             padding: 5vw;
             /* transition: all 1s; */
         }
-        .section.red        { background-color: hsl(0, 50%, 70%);   }
-        .section.cyan       { background-color: hsl(180, 50%, 70%); }
-        .section.green      { background-color: hsl(120, 50%, 70%); }
-        .section.magenta    { background-color: hsl(300, 50%, 70%); height: 150vh; }
-        .section.blue       { background-color: hsl(240, 50%, 70%); }
         p {
             width: 80%;
             margin: auto;
@@ -46,18 +41,18 @@
             min-font-
             line-height: 2;
         }
+        .section.red        { background-color: hsl(0, 50%, 70%);   }
+        .section.cyan       { background-color: hsl(180, 50%, 70%); }
+        .section.green      { background-color: hsl(120, 50%, 70%); }
+        .section.magenta    { background-color: hsl(300, 50%, 70%); }
+        .section.blue       { background-color: hsl(240, 50%, 70%); }
         .section.video {
             height: auto;
             display: block;
             padding: 0;
         }
         video {
-            /* padding: 5vh 0; */
             display: block;
-            /* height: 110vh; */
-            /* width: 100%; */
-            /* max-height: 90vh; */
-            /* max-width: 90vw; */
             margin: 0 auto;
         }
     </style>
@@ -76,11 +71,9 @@
     </div>
     
     <div class="section video">
-        <video muted="muted" src="videos/1400x788_04_ScrollAnimationTechnology_fahrerlebnis_v015.mp4">Sorry, your browser doesn't support embedded videos.</video>
+        <video src="videos/1400x788_04_ScrollAnimationTechnology_fahrerlebnis_v015.mp4">Sorry, your browser doesn't support embedded videos.</video>
         <!-- <video src="videos/Chrome_ImF.ogv">Sorry, your browser doesn't support embedded videos.</video> -->
         <!-- <video src="videos/1000px-Google_Chrome_icon_(September_2014).svg.mp4">Sorry, your browser doesn't support embedded videos.</video> -->
-        <!-- <video src="videos/1000px-Google_Chrome_icon_(September_2014).svg_w640_fps30.mp4">Sorry, your browser doesn't support embedded videos.</video> -->
-        <!-- <video src="videos/anxious_about_math.mp4">Sorry, your browser doesn't support embedded videos.</video> -->
         <!-- <video src="videos/1000px-Google_Chrome_icon_1_kfd.mp4">Sorry, your browser doesn't support embedded videos.</video> -->
         <!-- <video src="videos/bedroom.mp4">Sorry, your browser doesn't support embedded videos.</video> -->
         <!-- <video src="videos/bedroom_1kfd.mp4">Sorry, your browser doesn't support embedded videos.</video> -->
@@ -102,34 +95,10 @@
 <footer></footer>
 
 <script src="sticky-scrollable-video.js"></script>
-<script src="in-view.js"></script>
 
 <script>
     var video = document.querySelector("video");
-    
-    video.addEventListener("click", function () {
-        if (video.paused) {
-            video.play();
-        }
-    });
-    
-    // var ssv = new StickyScrollableVideo(video, 200);
-    
-    var vt = new ViewTracker(video, {
-        "enter" : function () {
-            video.play();
-        },
-        "exit" : function () {
-            video.pause();
-            video.currentTime = 0;
-        },
-    });
-    
-    // window.addEventListener("scroll", throttle(function () {
-        // var iv = new inView(video);
-        // var iv = new inView(document.querySelector(".magenta"));
-        // console.log(iv.element, iv.viewport, iv.visibility);
-    // }, 500));
+    var ssv = new StickyScrollableVideo(video, 250);
 </script>
 
 </body>
