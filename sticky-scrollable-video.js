@@ -39,20 +39,14 @@ function StickyScrollableVideo(vidEl, pixelsPerSec) {
         self.video.element.style.position = "sticky";
         self.video.element.style.top      = "0";
         
-        self.video.boundingBox = self.video.element.getBoundingClientRect();
-        self.video.height      = self.video.element.offsetHeight;
-        self.video.top         = self.video.boundingBox.top + scrollY;
-        self.video.bottom      = self.video.top + self.video.height;
+        self.video.height = self.video.element.offsetHeight;
         
-        self.parent.boundingBox = self.parent.element.getBoundingClientRect();
         self.parent.height      = self.parent.element.offsetHeight;
+        self.parent.boundingBox = self.parent.element.getBoundingClientRect();
         self.parent.top         = self.parent.boundingBox.top + scrollY;
         self.parent.bottom      = self.parent.top + self.parent.height;
         
-        console.log(self.video);
-        console.log(self.parent);
-        
-        self.scroll.area   = [self.video.top, self.video.top + self.parent.height - self.video.height];
+        self.scroll.area   = [self.parent.top, self.parent.top + self.parent.height - self.video.height];
         self.scroll.height = self.scroll.area[1] - self.scroll.area[0];
         
         self.siblings.elements = StickyScrollableVideo.getSiblings(self.parent.element);
@@ -89,7 +83,6 @@ function StickyScrollableVideo(vidEl, pixelsPerSec) {
                 if (!self.video.playing) {
                     self.video.playing = true;
                 }
-                console.log(scrollPercent, nextFrameTime);
                 requestAnimationFrame(function () {
                     self.video.element.currentTime = nextFrameTime;
                 });
@@ -117,9 +110,13 @@ function StickyScrollableVideo(vidEl, pixelsPerSec) {
             
         });
         
+        var initialScrollPercent = parseFloat(((scrollY - self.scroll.area[0]) / self.scroll.height).toFixed(6));
+        var initialFrameTime     = parseFloat((initialScrollPercent * self.video.element.duration).toFixed(6));
+        requestAnimationFrame(function () {
+            self.video.element.currentTime = initialFrameTime;
+        });
+        
     });
-    
-    // console.log(this);
 }
 
 StickyScrollableVideo.getSiblings = function getYoungerSiblings(el) {
