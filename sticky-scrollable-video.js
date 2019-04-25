@@ -67,37 +67,15 @@ function StickyScrollableVideo(options) {
             self.video.element.removeAttribute("data-src");
         }
         
-        self.video.height = self.video.element.offsetHeight;
-        
-        let height = Math.round(self.video.element.duration * self.scroll.pixelsPerSec) + self.video.height;
-        self.wrapper.element.style.height  = height + "px";
-        self.video.element.style.position = "sticky";
-        self.video.element.style.top      = "0";
-        
-        self.wrapper.height = self.wrapper.element.offsetHeight;
-        self.wrapper.top    = self.wrapper.element.getBoundingClientRect().top + scrollY;
-        self.wrapper.bottom = self.wrapper.top + self.wrapper.height;
-        
-        self.scroll.area   = [self.wrapper.top, self.wrapper.top + self.wrapper.height - self.video.height];
-        self.scroll.height = self.scroll.area[1] - self.scroll.area[0];
-        
-        self.siblings.offsetTop = getAbsRect(self.siblings.elements[0]).top - self.wrapper.bottom;
-        
-        self.siblings.elements.forEach(function (sibling, index) {
-            self.siblings.totalHeight += sibling.offsetHeight;
-            self.siblings.style.width.push(sibling.offsetWidth);
-            self.siblings.style.left.push(getAbsRect(sibling).left);
-            if (index == 0) {
-                self.siblings.style.top.push(self.video.height);
-            } else {
-                var prevSiblings = self.siblings.elements.slice(0, index);
-                var height = 0;
-                prevSiblings.forEach(sib => height += self.video.height + sib.offsetHeight);
-                self.siblings.style.top.push(height);
-            }
-        });
+        self.initialize();
         
         self.moveSiblingsUp();
+        
+        var initialScrollPercent = parseFloat(((scrollY - self.scroll.area[0]) / self.scroll.height).toFixed(6));
+        var initialFrameTime     = parseFloat((initialScrollPercent * self.video.element.duration).toFixed(6));
+        requestAnimationFrame(function () {
+            self.video.element.currentTime = initialFrameTime;
+        });
         
         window.addEventListener("scroll", function() {
             var scrollPercent = 0;
@@ -136,11 +114,10 @@ function StickyScrollableVideo(options) {
             
         });
         
-        var initialScrollPercent = parseFloat(((scrollY - self.scroll.area[0]) / self.scroll.height).toFixed(6));
-        var initialFrameTime     = parseFloat((initialScrollPercent * self.video.element.duration).toFixed(6));
-        requestAnimationFrame(function () {
-            self.video.element.currentTime = initialFrameTime;
-        });
+        window.addEventListener("resize", throttle(function() {
+            console.log("resize initialize");
+            self.initialize();
+        }, 250));
         
     });
     
@@ -149,6 +126,61 @@ function StickyScrollableVideo(options) {
     }
     
 }
+
+StickyScrollableVideo.prototype.initialize = function initialize() {
+    this.video.height = this.video.element.offsetHeight;
+    
+    let height = Math.round(this.video.element.duration * this.scroll.pixelsPerSec) + this.video.height;
+    this.wrapper.element.style.height  = height + "px";
+    this.video.element.style.position = "sticky";
+    this.video.element.style.top      = "0";
+    
+    this.wrapper.height = this.wrapper.element.offsetHeight;
+    this.wrapper.top    = this.wrapper.element.getBoundingClientRect().top + scrollY;
+    this.wrapper.bottom = this.wrapper.top + this.wrapper.height;
+    
+    this.scroll.area   = [this.wrapper.top, this.wrapper.top + this.wrapper.height - this.video.height];
+    this.scroll.height = this.scroll.area[1] - this.scroll.area[0];
+    
+    this.siblings.offsetTop   = getAbsRect(this.siblings.elements[0]).top - this.wrapper.bottom;
+    this.siblings.totalHeight = 0;
+    this.siblings.style.width = [];
+    this.siblings.style.left  = [];
+    this.siblings.style.top   = [];
+    this.siblings.frozen      = false;
+    this.siblings.position    = null;
+    
+    var self = this;
+    
+    this.siblings.elements.forEach(function (sibling, index) {
+        self.siblings.totalHeight += sibling.offsetHeight;
+        self.siblings.style.width.push(sibling.offsetWidth);
+        self.siblings.style.left.push(getAbsRect(sibling).left);
+        if (index == 0) {
+            self.siblings.style.top.push(self.video.height);
+        } else {
+            var prevSiblings = self.siblings.elements.slice(0, index);
+            var height = 0;
+            prevSiblings.forEach(sib => height += self.video.height + sib.offsetHeight);
+            self.siblings.style.top.push(height);
+        }
+    });
+};
+
+
+function throttle(callback, delay) {
+    var timeoutHandler = null;
+    return function () {
+        if (timeoutHandler == null) {
+            timeoutHandler = setTimeout(function () {
+                callback();
+                clearInterval(timeoutHandler);
+                timeoutHandler = null;
+            }, delay);
+        }
+    }
+}
+
 
 StickyScrollableVideo.getSiblings = function getYoungerSiblings(el) {
     var siblings = [];
