@@ -46,6 +46,7 @@
         .section.green      { background-color: hsl(120, 50%, 70%); }
         .section.magenta    { background-color: hsl(300, 50%, 70%); }
         .section.blue       { background-color: hsl(240, 50%, 70%); }
+        .section.yellow     { background-color: hsl(60, 50%, 70%);  }
         .section.video {
             height: auto;
             display: block;
@@ -71,6 +72,10 @@
         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Scelerisque eu ultrices vitae auctor eu augue ut. Massa sed elementum tempus egestas sed sed. Ornare aenean euismod elementum nisi quis eleifend quam. Et odio pellentesque diam volutpat commodo sed. Venenatis urna cursus eget nunc scelerisque viverra mauris. Non consectetur a erat nam at lectus urna duis convallis. Non quam lacus suspendisse faucibus interdum posuere lorem ipsum. Dui accumsan sit amet nulla facilisi. Ornare quam viverra orci sagittis. In pellentesque massa placerat duis.</p>
     </div>
     
+    <div class="section green">
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Scelerisque eu ultrices vitae auctor eu augue ut.</p>
+    </div>
+    
     <div class="section video">
         <video src="videos/1400x788_04_ScrollAnimationTechnology_fahrerlebnis_v015.mp4">Sorry, your browser doesn't support embedded videos.</video>
         <!-- <video src="videos/Chrome_ImF.ogv">Sorry, your browser doesn't support embedded videos.</video> -->
@@ -80,15 +85,15 @@
         <!-- <video src="videos/bedroom_1kfd.mp4">Sorry, your browser doesn't support embedded videos.</video> -->
     </div>
     
-    <div class="section green">
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Scelerisque eu ultrices vitae auctor eu augue ut.</p>
-    </div>
-    
     <div class="section magenta">
         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Scelerisque eu ultrices vitae auctor eu augue ut. Massa sed elementum tempus egestas sed sed. Ornare aenean euismod elementum nisi quis eleifend quam. Et odio pellentesque diam volutpat commodo sed. Venenatis urna cursus eget nunc scelerisque viverra mauris. Non consectetur a erat nam at lectus urna duis convallis. Non quam lacus suspendisse faucibus interdum posuere lorem ipsum. Dui accumsan sit amet nulla facilisi. Ornare quam viverra orci sagittis. In pellentesque massa placerat duis.</p>
     </div>
     
     <div class="section blue">
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Scelerisque eu ultrices vitae auctor eu augue ut. Massa sed elementum tempus egestas sed sed. Ornare aenean euismod elementum nisi quis eleifend quam. Et odio pellentesque diam volutpat commodo sed. Venenatis urna cursus eget nunc scelerisque viverra mauris. Non consectetur a erat nam at lectus urna duis convallis. Non quam lacus suspendisse faucibus interdum posuere lorem ipsum. Dui accumsan sit amet nulla facilisi. Ornare quam viverra orci sagittis. In pellentesque massa placerat duis.</p>
+    </div>
+    
+    <div class="section yellow">
         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Scelerisque eu ultrices vitae auctor eu augue ut. Massa sed elementum tempus egestas sed sed. Ornare aenean euismod elementum nisi quis eleifend quam. Et odio pellentesque diam volutpat commodo sed. Venenatis urna cursus eget nunc scelerisque viverra mauris. Non consectetur a erat nam at lectus urna duis convallis. Non quam lacus suspendisse faucibus interdum posuere lorem ipsum. Dui accumsan sit amet nulla facilisi. Ornare quam viverra orci sagittis. In pellentesque massa placerat duis.</p>
     </div>
 </main>
@@ -98,8 +103,13 @@
 <script src="sticky-scrollable-video.js"></script>
 
 <script>
-    var video = document.querySelector("video");
-    var ssv = new StickyScrollableVideo(video);
+    var options = {
+        video        : document.querySelector("video"),
+        grandParent  : document.querySelector("main"),
+        siblings     : StickyScrollableVideo.getSiblings(document.querySelector(".section.video")),
+        pixelsPerSec : 500,
+    };
+    ssv = new StickyScrollableVideo(options);
 </script>
 
 </body>
