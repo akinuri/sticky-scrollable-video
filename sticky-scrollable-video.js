@@ -12,17 +12,28 @@ function getAbsRect(element) {
 };
 
 
+function throttle(callback, delay) {
+    var timeoutHandler = null;
+    return function () {
+        if (timeoutHandler == null) {
+            timeoutHandler = setTimeout(function () {
+                callback();
+                clearInterval(timeoutHandler);
+                timeoutHandler = null;
+            }, delay);
+        }
+    }
+}
+
+
 function StickyScrollableVideo(options) {
     
-    var options = options || {
-        // video        : null,
-        // hasWrapper   : null,
-        // grandParent  : null,
-        // siblings     : null,
-        // pixelsPerSec : null,
-    };
+    var options = options || {}; // {video, hasWrapper, grandParent, siblings, pixelsPerSec, afterWidth}
     
-    this.video = { element : options.video };
+    this.video = {
+        element : options.video,
+        loadedmetadata  : null,
+    };
     
     // wrapper will have a really long height and act as a seekbar
     this.wrapper = {};
@@ -41,11 +52,11 @@ function StickyScrollableVideo(options) {
     this.grandParent = options.grandParent;
     
     this.siblings = {
-        offsetTop   : 0,
         elements    : options.siblings,
+        offsetTop   : 0,
         totalHeight : 0,
         frozen      : false,
-        position    : null,
+        position    : "bottom", // top = translateY(-Y)
         style      : {
             width : [],
             top   : [],
@@ -57,27 +68,49 @@ function StickyScrollableVideo(options) {
         pixelsPerSec : options.pixelsPerSec || 250,
         area         : [],
         height       : 0,
+        afterWidth   : options.afterWidth || 0,
+        disabled     : false,
     };
     
     var self = this;
-    
     this.video.element.addEventListener("loadedmetadata", function() {
+        self.loadedmetadata();
+    });
+    
+    if (this.video.element.dataset.src) {
+        this.video.element.src = this.video.element.dataset.src;
+    }
+    
+}
+
+
+StickyScrollableVideo.prototype.loadedmetadata = function () {
+    
+    this.video.loadedmetadata = true;
         
-        if (self.video.element.dataset.src) {
-            self.video.element.removeAttribute("data-src");
-        }
-        
-        self.initialize();
-        
-        self.moveSiblingsUp();
-        
-        var initialScrollPercent = parseFloat(((scrollY - self.scroll.area[0]) / self.scroll.height).toFixed(6));
-        var initialFrameTime     = parseFloat((initialScrollPercent * self.video.element.duration).toFixed(6));
-        requestAnimationFrame(function () {
-            self.video.element.currentTime = initialFrameTime;
-        });
-        
-        window.addEventListener("scroll", function() {
+    if (this.video.element.dataset.src) {
+        this.video.element.removeAttribute("data-src");
+    }
+    
+    this.initialize();
+    
+    this.moveSiblingsUp();
+    
+    var self = this;
+    
+    var initialScrollPercent = parseFloat(((scrollY - this.scroll.area[0]) / this.scroll.height).toFixed(6));
+    var initialFrameTime     = parseFloat((initialScrollPercent * this.video.element.duration).toFixed(6));
+    requestAnimationFrame(function () {
+        self.video.element.currentTime = initialFrameTime;
+    });
+    
+    window.addEventListener("scroll", function() {
+        if (innerWidth >= self.scroll.afterWidth) {
+            
+            if (self.scroll.disabled) {
+                self.initialize();
+            }
+            
             var scrollPercent = 0;
             var nextFrameTime = 0;
             
@@ -111,27 +144,35 @@ function StickyScrollableVideo(options) {
                     self.moveSiblingsDown();
                 }
             }
-            
-        });
-        
-        window.addEventListener("resize", throttle(function() {
-            console.log("resize initialize");
-            self.initialize();
-        }, 250));
-        
+        } else {
+            if (!self.disabled) {
+                self.disable();
+            }
+        }
     });
     
-    if (this.video.element.dataset.src) {
-        this.video.element.src = this.video.element.dataset.src;
-    }
+    window.addEventListener("resize", throttle(function() {
+        if (innerWidth >= self.scroll.afterWidth) {
+            if (self.scroll.disabled) {
+                self.initialize();
+                self.moveSiblingsUp();
+            }
+        } else {
+            if (!self.disabled) {
+                self.disable();
+            }
+        }
+    }, 250));
     
-}
+};
+
 
 StickyScrollableVideo.prototype.initialize = function initialize() {
-    this.video.height = this.video.element.offsetHeight;
+    this.scroll.disabled = false;
+    this.video.height    = this.video.element.offsetHeight;
     
     let height = Math.round(this.video.element.duration * this.scroll.pixelsPerSec) + this.video.height;
-    this.wrapper.element.style.height  = height + "px";
+    this.wrapper.element.style.height = height + "px";
     this.video.element.style.position = "sticky";
     this.video.element.style.top      = "0";
     
@@ -168,18 +209,44 @@ StickyScrollableVideo.prototype.initialize = function initialize() {
 };
 
 
-function throttle(callback, delay) {
-    var timeoutHandler = null;
-    return function () {
-        if (timeoutHandler == null) {
-            timeoutHandler = setTimeout(function () {
-                callback();
-                clearInterval(timeoutHandler);
-                timeoutHandler = null;
-            }, delay);
-        }
-    }
-}
+StickyScrollableVideo.prototype.disable = function disableScroll() {
+    
+    this.video.height = this.video.element.offsetHeight;
+    this.video.playing = false;
+    
+    this.video.element.style.position = "";
+    
+    this.wrapper.height = null;
+    this.wrapper.top    = null;
+    this.wrapper.bottom = null;
+    
+    this.wrapper.element.style.height = "";
+    
+    this.grandParent.style.paddingBottom = "";
+    
+    this.siblings.style.left  = [];
+    this.siblings.style.top   = [];
+    this.siblings.style.width = [];
+    this.siblings.position    = null;
+    this.siblings.totalHeight = null;
+    this.siblings.frozen      = false;
+    
+    this.scroll.disabled = true;
+    this.scroll.area     = [];
+    this.scroll.height   = null;
+    
+    var self = this;
+    
+    this.siblings.elements.forEach(function (sibling, index) {
+        sibling.style.position = "";
+        sibling.style.top = "";
+        sibling.style.left = "";
+        sibling.style.width = "";
+        sibling.style.transform = "";
+    });
+    
+    this.moveSiblingsDown();
+};
 
 
 StickyScrollableVideo.getSiblings = function getYoungerSiblings(el) {
@@ -191,6 +258,7 @@ StickyScrollableVideo.getSiblings = function getYoungerSiblings(el) {
     return siblings;
 };
 
+
 StickyScrollableVideo.prototype.moveSiblingsUp = function () {
     var self = this;
     this.siblings.elements.forEach(function (sibling) {
@@ -201,6 +269,7 @@ StickyScrollableVideo.prototype.moveSiblingsUp = function () {
     this.siblings.position = "up";
 };
 
+
 StickyScrollableVideo.prototype.moveSiblingsDown = function () {
     var self = this;
     this.siblings.elements.forEach(function (sibling) {
@@ -210,6 +279,7 @@ StickyScrollableVideo.prototype.moveSiblingsDown = function () {
     });
     this.siblings.position = "down";
 };
+
 
 StickyScrollableVideo.prototype.freezeSiblings = function () {
     var self = this;
@@ -224,6 +294,7 @@ StickyScrollableVideo.prototype.freezeSiblings = function () {
     this.grandParent.style.paddingBottom = this.siblings.totalHeight + "px";
     this.siblings.frozen = true;
 };
+
 
 StickyScrollableVideo.prototype.unfreezeSiblings = function () {
     var self = this;
